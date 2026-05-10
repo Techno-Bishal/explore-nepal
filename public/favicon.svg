@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#0d4d4d"/>
+  <path d="M128 40 L200 160 L56 160 Z" fill="#0a6666"/>
+  <path d="M128 40 L180 140 L76 140 Z" fill="#0d7a7a"/>
+  <path d="M128 60 L160 120 L96 120 Z" fill="#ffffff" opacity="0.3"/>
+  <circle cx="128" cy="50" r="8" fill="#d4af37"/>
+  <rect x="40" y="80" width="3" height="60" fill="#8b7355"/>
+  <rect x="50" y="85" width="12" height="8" fill="#d4af37"/>
+  <rect x="50" y="95" width="12" height="8" fill="#c41e3a"/>
+  <rect x="50" y="105" width="12" height="8" fill="#0d7a7a"/>
+  <rect x="50" y="115" width="12" height="8" fill="#ffffff"/>
+  <rect x="50" y="125" width="12" height="8" fill="#4169e1"/>
+  <rect x="194" y="95" width="3" height="50" fill="#8b7355"/>
+  <rect x="204" y="100" width="12" height="8" fill="#d4af37"/>
+  <rect x="204" y="110" width="12" height="8" fill="#c41e3a"/>
+  <rect x="204" y="120" width="12" height="8" fill="#0d7a7a"/>
+  <rect x="204" y="130" width="12" height="8" fill="#ffffff"/>
+  <path d="M56 160 L200 160 L220 200 L36 200 Z" fill="#0a3d3d"/>
+</svg>

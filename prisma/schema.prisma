@@ -1,0 +1,353 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/explore_nepal/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  name                String?
+  email               String     @unique
+  emailVerified       DateTime?
+  hashedPassword      String?
+  image               String?
+  role                String     @default("user")
+  bio                 String?
+  travelStyle         String?
+  location            String?
+  travelPersonality   String?
+  explorerLevel       Int        @default(1)
+  totalPoints         Int        @default(0)
+  sessionVersion      Int        @default(0)
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  lastLoginAt         DateTime?
+  isBlocked           Boolean    @default(false)
+  profilePrivacy      String     @default("public")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  accounts            Account[]
+  sessions            Session[]
+  favorites           Favorite[]
+  reviews             Review[]
+  travelPosts         TravelPost[]
+  comments            Comment[]
+  visitedPlaces       VisitedPlace[]
+  wishlistItems       WishlistItem[]
+  badges              UserBadge[]
+  personalityResults  TravelPersonalityResult[]
+  contentReports      ContentReport[]
+
+  @@index([email])
+  @@index([resetToken])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  slug         String        @unique
+  icon         String?
+  description  String?
+  createdAt    DateTime      @default(now())
+  destinations DestinationCategory[]
+
+  @@index([slug])
+}
+
+model Destination {
+  id                  String        @id @default(cuid())
+  name                String
+  slug                String        @unique
+  location            String
+  shortDescription    String
+  longDescription     String        @db.Text
+  imageUrl            String
+  galleryImages       String[]      @default([])
+  latitude            Float
+  longitude           Float
+  altitude            Int
+  difficultyLevel     String        @default("easy")
+  budgetLevel         String        @default("moderate")
+  budgetDetails       String?
+  bestSeason          String
+  travelDuration      String
+  adventureLevel      Int           @default(5)
+  familyFriendly      Boolean       @default(true)
+  isFeatured          Boolean       @default(false)
+  isTrending          Boolean       @default(false)
+  travelTips          String[]      @default([])
+  safetyTips          String[]      @default([])
+  packingSuggestions  String[]      @default([])
+  localCultureInfo    String?
+  transportDetails    String?
+  nearbyAttractions   String[]      @default([])
+  weatherInfo         String?
+  nearbyHotels        String[]      @default([])
+  nearbyRestaurants   String[]      @default([])
+  highlights          String[]      @default([])
+  budgetEstimateLow   Int?
+  budgetEstimateMid   Int?
+  budgetEstimateHigh  Int?
+  emergencyContacts   String?       @db.Text
+  nearestHospital     String?
+  nearestPolice       String?
+  networkAvailability String?
+  crowdLevel          String?
+  altitudeWarning     String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  categories          DestinationCategory[]
+  favorites           Favorite[]
+  reviews             Review[]
+  travelPosts         TravelPost[]
+  subDestinations     SubDestination[]
+  comments            Comment[]
+  visitedBy           VisitedPlace[]
+  wishlistedBy        WishlistItem[]
+
+  @@index([slug])
+  @@index([isFeatured])
+  @@index([isTrending])
+  @@index([difficultyLevel])
+  @@index([budgetLevel])
+}
+
+model DestinationCategory {
+  id            String      @id @default(cuid())
+  destinationId String
+  categoryId    String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([destinationId, categoryId])
+}
+
+model Favorite {
+  id            String      @id @default(cuid())
+  userId        String
+  destinationId String
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, destinationId])
+  @@index([userId])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  status    String   @default("unread")
+  createdAt DateTime @default(now())
+}
+
+model DestinationImage {
+  id               String  @id @default(cuid())
+  destinationId    String?
+  cloudStoragePath String
+  isPublic         Boolean @default(true)
+  fileName         String
+  createdAt        DateTime @default(now())
+
+  @@index([destinationId])
+}
+
+model Review {
+  id            String      @id @default(cuid())
+  rating        Int         @default(5)
+  title         String
+  content       String      @db.Text
+  imageUrls     String[]    @default([])
+  userId        String
+  destinationId String
+  isApproved    Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@index([destinationId])
+  @@index([userId])
+}
+
+model TravelPost {
+  id            String      @id @default(cuid())
+  title         String
+  content       String      @db.Text
+  imageUrls     String[]    @default([])
+  destinationId String?
+  userId        String
+  isPublished   Boolean     @default(true)
+  likes         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([destinationId])
+}
+
+model SubDestination {
+  id              String      @id @default(cuid())
+  name            String
+  slug            String
+  description     String      @db.Text
+  imageUrl        String
+  category        String      @default("attraction")
+  destinationId   String
+  sortOrder       Int         @default(0)
+  createdAt       DateTime    @default(now())
+  destination     Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@index([destinationId])
+  @@unique([destinationId, slug])
+}
+
+model Comment {
+  id            String      @id @default(cuid())
+  content       String      @db.Text
+  userId        String
+  destinationId String
+  parentId      String?
+  likes         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  parent        Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies       Comment[]   @relation("CommentReplies")
+
+  @@index([destinationId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  role      String
+  content   String   @db.Text
+  sessionId String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model VisitedPlace {
+  id            String      @id @default(cuid())
+  userId        String
+  destinationId String
+  visitedDate   DateTime?
+  notes         String?
+  rating        Int?
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, destinationId])
+  @@index([userId])
+}
+
+model WishlistItem {
+  id            String      @id @default(cuid())
+  userId        String
+  destinationId String
+  priority      Int         @default(0)
+  notes         String?
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, destinationId])
+  @@index([userId])
+}
+
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeId     String
+  badgeName   String
+  badgeIcon   String
+  badgeDesc   String?
+  category    String   @default("exploration")
+  earnedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+
+model TravelPersonalityResult {
+  id              String   @id @default(cuid())
+  userId          String
+  personality     String
+  personalityIcon String?
+  description     String?  @db.Text
+  traits          String[] @default([])
+  answers         String?  @db.Text
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ContentReport {
+  id            String   @id @default(cuid())
+  reporterId    String
+  contentType   String
+  contentId     String
+  reason        String
+  details       String?  @db.Text
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reporter      User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([contentType, contentId])
+  @@index([reporterId])
+  @@index([status])
+}
